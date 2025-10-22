@@ -41,8 +41,7 @@ class LtMemory:
         self.vectorstore.save_local(self.folder)
 
 
-    def search(self, query: str, k: int = 3):
-        """Ähnlichkeitssuche"""
+    def search(self, query: str, k: int = 5):
         results = self.vectorstore.similarity_search(query, k=k)
         return [
             {
