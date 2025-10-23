@@ -8,7 +8,7 @@ class SQL:
         self.filename = filename
         self.sqlite_uri = f"sqlite:///{self.filename}"
         self.connection_args = {"check_same_thread": False}
-        self.engine = create_engine(self.sqlite_uri, connect_args=self.connection_args)
+        self.engine = self.get_engine()
         self.SessionLocal = sessionmaker(bind=self.engine, autoflush=False, autocommit=False)
         
     def get_db(self):
@@ -19,3 +19,6 @@ class SQL:
             logging.error("Error using the db session: %s", e)          
         finally:
             db.close()
+            
+    def get_engine(self):
+        return create_engine(self.sqlite_uri, connect_args=self.connection_args)
