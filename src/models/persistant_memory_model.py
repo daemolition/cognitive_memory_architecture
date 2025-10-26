@@ -3,6 +3,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from sqlalchemy import Integer, String, ForeignKey, DateTime
 from typing import List, Optional
 
+from pydantic import BaseModel
+
 class Base(DeclarativeBase):
     
     def to_dict(self):
@@ -12,26 +14,16 @@ class Base(DeclarativeBase):
 class ChatSession(Base):
     __tablename__ = "chat_session"
     
-    id: Mapped[str] = mapped_column(String(255), primary_key=True)
-    title: Mapped[str] = mapped_column(String(255))
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, nullable=True)
+    session_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # One-to-many relationship with ChatMessage
-    messages: Mapped[List["ChatMessage"]] = relationship(back_populates="session", cascade="all. delete-orphan")
+    summaries: Mapped[List["ChatSummary"]] = relationship(back_populates="session", cascade="all. delete-orphan")  
     
-
-class ChatMessage(Base):
-    __tablename__ = "chat_message"
-    
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    session_id: Mapped[int] = mapped_column(ForeignKey("chat_session.id"))
-    role: Mapped[str] = mapped_column(String(255))
-    content: Mapped[str] = mapped_column(String(255))
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    
-    # One-to-one relationship with ChatSession
-    session: Mapped["ChatSession"] = relationship(back_populates="messages")
-        
         
 class ChatSummary(Base):
     __tablename__ = "chat_summary"
@@ -40,8 +32,37 @@ class ChatSummary(Base):
     initial_question: Mapped[str] = mapped_column(String, nullable=False)
     count_tokens: Mapped[int] = mapped_column(Integer, nullable=False)
     human_summary: Mapped[str] = mapped_column(String, nullable=False)
-    ai_summary: Mapped[str] = mapped_column(String, nullable=False)  
-    created_at: Mapped[str] = mapped_column(String, nullable=False)    
+    ai_summary: Mapped[str] = mapped_column(String, nullable=False) 
+    context_summary: Mapped[str] = mapped_column(String, nullable=False)     
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)    
     
-    session_id: Mapped[int] = mapped_column(ForeignKey("chat_session.id"))
-    session: Mapped["ChatSession"] = relationship()  
+    session_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    session: Mapped["ChatSession"] = relationship(
+        back_populates="summaries",
+        primaryjoin="ChatSummary.session_id==ChatSsession.session_id",
+        foreign_keys=[session_id],
+        viewonly=True
+    )  
+    
+    
+class ChatSessionSchema(BaseModel):
+    id: int
+    title: str
+    created_at: datetime   
+    summaries: List[str]
+    
+    class Config:
+        orm_mode=True    
+
+class ChatSummarySchema(BaseModel):
+    id: int
+    initial_question: str
+    count_tokens: int
+    human_summary: str
+    ai_summary: str  
+    context_summary: str
+    created_at: datetime
+    session_id: int
+    
+    class Config:
+        orm_mode = True
