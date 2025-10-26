@@ -2,7 +2,7 @@ import logging
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker, scoped_session
-from ..models.persistant_memory_model import Base
+from ..models.episodic_memory_model import Base
 
 class SQL:
     def __init__(self, filename: str="stmemory.sqlite3"):
