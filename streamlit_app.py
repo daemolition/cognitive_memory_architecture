@@ -1,12 +1,12 @@
 import streamlit as st
 
-from src.databases.semantic_memory import LtMemory
-from src.databases.stmemory import StMemory
-from src.databases.message_history import MessageHistory
-from src.agents.message_agent import MessageAgent
+from src.components.semantic_memory import LtMemory
+from src.components.stmemory import StMemory
+from src.components.message_history import MessageHistory
+from src.agents.chat_agent import ChatAgent
 from src.models.persistant_memory_model import StMemory, Base
 from src.components.sql import SQL
-from src.models.ollama import LLM
+from src.models.model_base import LLM
 
 # Initialize the database
 sql = SQL()
@@ -20,7 +20,7 @@ model = LLM(context=CONTEXT)
 llm = model.load_llm()
 
 # Agent
-message_agent = MessageAgent()
+message_agent = ChatAgent()
 
   
 if not "history" in st.session_state:
