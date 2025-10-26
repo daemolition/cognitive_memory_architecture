@@ -5,9 +5,9 @@ import uuid
 
 from src.components.semantic_memory import SemanticMemory
 from src.components.message_history import MessageHistory
-from src.components.persistant_memory import PersistantMemory
+from src.components.episodic_memory import EpisodicMemory
 from src.agents.chat_agent import ChatAgent
-from src.models.persistant_memory_model import ChatSession, ChatSummary
+from src.models.episodic_memory_model import ChatSession, ChatSummary
 from src.components.sql import SQL
 from src.models.model_base import LLM
 
@@ -36,11 +36,11 @@ app.secret_key = "TestKey123"
 
 # MessageTokenCounter
 msg = MessageHistory(token_limit=CONTEXT)
-persistant_memory = PersistantMemory()
+persistant_memory = EpisodicMemory()
 
 @app.route("/", methods=['GET','POST'])
 def index():
-    return render_template('chat.html', messages=msg.get_messages())
+    return render_template('chat.html')
     
 def generate(user_input, session_id):
     try:
@@ -82,14 +82,19 @@ def stream():
 
 @app.route('/stream/<sessionid>', methods=["GET", "POST"])
 def stream_with_session_id(session_id):
-    data = request.get_json()
-    # Chatverlauf sichern (optional)
-    msg.add(role=data.get("user", "User"),message=data["message"], session_id=session['id'])
+    messages=msg.get_messages(session_id)
+    
+    if request.method == "POST":
+        data = request.get_json()
+        # Chatverlauf sichern (optional)
+        msg.add(role=data.get("user", "User"),message=data["message"], session_id=session['id'])
 
-    return Response(
-        stream_with_context(generate(data["message"], session_id)),
-        mimetype="text/event-stream"
-    )
+        return Response(
+            stream_with_context(generate(data["message"], session_id)),
+            mimetype="text/event-stream"
+        )
+    
+    return render_template('caht.html', messages=messages)
                 
 
 if __name__ == "__main__":
