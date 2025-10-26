@@ -1,15 +1,17 @@
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 from datetime import datetime
 import os
 
-class LtMemory:
-    def __init__(self, folder: str = "ltmemory_lc"):
+class SemanticMemory:
+    def __init__(self, folder: str = "semantic_memory", model_name:str = "all-MiniLM-L6-v2"):
+        """ Long Term Memory with Vectorrespresentation"""
+        
         self.folder = folder
         os.makedirs(folder, exist_ok=True)
 
-        self.embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+        self.embeddings = HuggingFaceEmbeddings(model_name=model_name)
 
         try:
             self.vectorstore = FAISS.load_local(

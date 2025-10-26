@@ -1,0 +1,5 @@
+{% for m in messages %}
+    <p><strong>{{ m.user}}</strong>: {{ m.msg }}</p>
+{% else %}
+    <p><em>No messages</em></p>
+{% endfor %}
