@@ -3,21 +3,19 @@ import time
 from flask import Flask, render_template, request, session, redirect, url_for, Response, stream_with_context, jsonify, json 
 import uuid
 
-from src.databases.semantic_memory import SemanticMemory
-from src.databases.message_history import MessageHistory
-from src.databases.persistant_memory import PersistantMemory
-from src.agents.message_agent import MessageAgent
-from src.models.persistant_memory_model import ChatMessage, ChatSession, ChatSummary, Base
+from src.components.semantic_memory import SemanticMemory
+from src.components.message_history import MessageHistory
+from src.components.persistant_memory import PersistantMemory
+from src.agents.chat_agent import ChatAgent
+from src.models.persistant_memory_model import ChatSession, ChatSummary
 from src.components.sql import SQL
-from src.models.ollama import LLM
+from src.models.model_base import LLM
 
 from langchain_core.messages import AIMessage, HumanMessage
 from markupsafe import Markup
-from markdown import markdown
 
 # Initialize the database
 sql = SQL()
-Base.metadata.create_all(sql.get_engine())
 
 # Overall context
 CONTEXT = 32768
@@ -26,7 +24,7 @@ CONTEXT = 32768
 model = LLM(context=CONTEXT)
 
 # Agent
-message_agent = MessageAgent()
+message_agent = ChatAgent()
 
 # Markup Patch
 def nl2br(value):
@@ -86,7 +84,7 @@ def stream():
 def stream_with_session_id(session_id):
     data = request.get_json()
     # Chatverlauf sichern (optional)
-    msg.add(role=data.get("user", "User"),content=data["message"], session_id=session['id'])
+    msg.add(role=data.get("user", "User"),message=data["message"], session_id=session['id'])
 
     return Response(
         stream_with_context(generate(data["message"], session_id)),
