@@ -44,7 +44,7 @@ class MessageHistory:
         """Estimate total token usage for a session based on message content length."""
         messages = self.get_messages(session_id=session_id)
         total = sum(
-            len(m["content"]) / 4 for m in messages
+            len(m["messages"]) / 4 for m in messages
         )  # /4 als Schätzwert (≈ GPT-Tokenisierung)
         return int(total)
 
