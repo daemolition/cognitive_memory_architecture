@@ -42,9 +42,9 @@ async function sendMessage() {
     });
 
     // Session ID
-    const sessionID = firstResponse.body['session_id']
-
-    const response = await fetch(`/stream/${sessionID}`, {
+    const firstResponseData = await firstResponse.json()
+    
+    const response = await fetch(`/stream/${firstResponseData.session_id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
