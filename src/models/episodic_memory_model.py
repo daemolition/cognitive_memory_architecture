@@ -22,7 +22,7 @@ class ChatSession(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # One-to-many relationship with ChatMessage
-    summaries: Mapped[List["ChatSummary"]] = relationship(back_populates="session", cascade="all. delete-orphan")  
+    summaries: Mapped[List["ChatSummary"]] = relationship(back_populates="session", cascade="all, delete-orphan")  
     
         
 class ChatSummary(Base):
@@ -52,7 +52,7 @@ class ChatSessionSchema(BaseModel):
     summaries: List[str]
     
     class Config:
-        orm_mode=True    
+        from_attributes=True    
 
 class ChatSummarySchema(BaseModel):
     id: int
@@ -65,4 +65,4 @@ class ChatSummarySchema(BaseModel):
     session_id: int
     
     class Config:
-        orm_mode = True
+        from_attributes = True
