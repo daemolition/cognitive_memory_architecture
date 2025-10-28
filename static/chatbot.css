@@ -16,7 +16,7 @@
 
     /* Chatbox */
     #chat {
-        width: 900%;
+        width: 100%;
         max-width: 800px;
         flex: 1;
         padding: 20px;
@@ -39,8 +39,9 @@
         border-radius: 15px;
         line-height: 1.4;
         word-wrap: break-word;
-        white-space: pre-wrap;
+        white-space: normal;
         animation: fadeIn 0.2s ease-in-out;
+        margin-bottom: 6px;
     }
 
     .message.user {
@@ -52,7 +53,6 @@
 
     .message.ai {
         align-self: flex-start;
-        background: #e9ecef;
         color: #222;
         border-bottom-left-radius: 3px;
     }
@@ -148,3 +148,24 @@
             background: #0078ff;
         }
     }
+
+
+.message.ai p {
+  margin: 0.4em 0;       /* kleinere Absatzlücken */
+  line-height: 1.4;      /* saubere Lesbarkeit */
+}
+
+.message.ai pre {
+  padding: 8px 10px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: monospace;
+  font-size: 0.95em;
+}
+
+.message.ai code {
+  background: #eee;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+}
