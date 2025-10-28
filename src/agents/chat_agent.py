@@ -1,6 +1,7 @@
 
 from src.models.model_base import LLM
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from ..components.short_term_memory import ShortTermMemory
 import uuid
 
 class ChatAgent:
@@ -14,19 +15,34 @@ class ChatAgent:
 
     def __init__(self):
         self.model = LLM()
-        self.llm = self.model.load_llm()        
+        self.llm = self.model.load_llm()       
+        self.short_term_memory = ShortTermMemory()         
         
         
-    def generate_message(self, user_input: str, session_id: str):
+    def generate_message(self, user_input: str, session_id: str, history=None):
         """Generates the chat message"""
         
         config = {"configurable": {"session_id": session_id}}
+        
+        messages = []
+        
+        # Add full history (human + assistant)
+        if history:
+            for item in history:
+                messages.append({
+                    'role': item['role'],
+                    'content': item['messages']
+                })
 
+        # Add the new user input at the end
+        messages.append({'role': 'user', 'content': user_input, "session_id": session_id})
+        
         try:
-            for chunk in self.llm.stream([HumanMessage(content=user_input)], config=config):
+            for chunk in self.llm.stream(messages, config=config):
                 if chunk.content:
                     yield chunk.content
             yield "[DONE]"
+            
         except Exception as e:
             print("Error:", e)
             yield f"Error: {str(e)}"
