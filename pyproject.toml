@@ -15,6 +15,7 @@ dependencies = [
     "langchain-ollama>=1.0.0",
     "markdown>=3.9",
     "psycopg-binary>=3.2.12",
+    "psycopg2-binary>=2.9.11",
     "redis>=7.0.0",
     "sentence-transformers>=5.1.2",
     "sqlalchemy>=2.0.44",
