@@ -1,8 +1,9 @@
 
 from src.models.model_base import LLM
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+
 from ..components.short_term_memory import ShortTermMemory
-import uuid
+
 
 class ChatAgent:
     """
@@ -17,7 +18,6 @@ class ChatAgent:
         self.model = LLM()
         self.llm = self.model.load_llm()       
         self.short_term_memory = ShortTermMemory()         
-        
         
     def generate_message(self, user_input: str, session_id: str, history=None):
         """Generates the chat message"""
