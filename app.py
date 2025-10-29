@@ -23,9 +23,10 @@ sql.create_all()
 
 # Overall context
 CONTEXT = 32768
+MODEL = "google/gemma-3-4b-it"
 
 # Model
-model = LLM(context=CONTEXT)
+model = LLM(context=CONTEXT, model=MODEL)
 
 # Agent
 message_agent = ChatAgent()
@@ -39,7 +40,7 @@ app.jinja_env.filters['nl2br'] = nl2br
 app.secret_key = "TestKey123"
 
 # Memory
-msg = MessageHistory(token_limit=CONTEXT)
+msg = MessageHistory(token_limit=CONTEXT, model=MODEL)
 persistant_memory = EpisodicMemory()
 short_term_memory = ShortTermMemory()
 
