@@ -3,6 +3,7 @@ import itertools
 from .episodic_memory import EpisodicMemory
 from .short_term_memory import ShortTermMemory
 from ..agents.summarize_agent import SummarizeAgent
+from ..models.model_base import LLM
 
 
 class MessageHistory:
@@ -14,18 +15,18 @@ class MessageHistory:
         short_term_memory (ShortTermMemory): An instance of ShortTermMemory to store recent messages.
     """
 
-    def __init__(self, token_limit: int = 8192):
+    def __init__(self, token_limit: int = 8192, model:str = ""):
         """
         Initializes the Message history
         Args:
             token_limit(int): The tokens provided with a standard value for counting and initiating the summary
             short_term_memory(Redis): The redis database for the conversional message history
         """
-
         self.token_limit = token_limit
         self.short_term_memory = ShortTermMemory()
         self.episodic_memory = EpisodicMemory()
-
+        self.model = LLM()
+        
 
     def add(self, role: str, message: str, session_id: str):
         self.short_term_memory.save_short_term_memory(
@@ -36,16 +37,22 @@ class MessageHistory:
         )
 
         if self.total_tokens(session_id) > self.token_limit * 0.8:
-            return True
+            return self.summarize_content(session_id=session_id)
         return False
     
 
     def total_tokens(self, session_id: str) -> int:
         """Estimate total token usage for a session based on message content length."""
         messages = self.get_messages(session_id=session_id)
-        total = sum(
-            len(m["messages"]) / 4 for m in messages
-        )  # /4 als Schätzwert (≈ GPT-Tokenisierung)
+        
+        total = 0               
+       
+        for message in messages:
+           if message["role"] == "user" or message['role'] == "assistant":
+               text = message["messages"]
+               token_count = self.model.count_tokens(text)
+               total += token_count
+            
         return int(total)
 
     def get_messages(self, session_id: str):
