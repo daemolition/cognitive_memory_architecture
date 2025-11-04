@@ -1,12 +1,11 @@
 {% extends "base.html" %}
-
 {% block chat %}
-<!-- Markdown + Syntax Highlighting -->
+
+<!-- Markdown & Highlighting -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-
 <script>
 marked.setOptions({
     breaks: true,
@@ -34,17 +33,10 @@ async function sendMessage() {
     chat.appendChild(aiMsg);
     chat.scrollTop = chat.scrollHeight;
 
-    // Streaming-Response
-    const firstResponse = await fetch("/stream", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-
     // Session ID
     const firstResponseData = await firstResponse.json()
     
-    const response = await fetch(`/stream/${firstResponseData.session_id}`, {
+    const response = await fetch(`/chat/${firstResponseData.session_id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -100,12 +92,37 @@ async function sendMessage() {
 }
 </script>
 
-<h1>Chat - Demo with Long and Short Term Memory</h1>
+<div class="layout">
+  <!--  Sidebar -->
+  <aside class="sidebar">
+    <header>
+      <h2>Chats</h2>
+      <form action="{{ url_for('new_chat') }}" method="post">
+        <button type="submit">＋ New Chat</button>
+      </form>
+    </header>
 
-<div id="chat" style="white-space: normal;"></div>
+    <ul class="chat-list">
+      {% for chat in chats %}
+      <li>
+        <a href="{{ url_for('chat', session_id=chat.session_id) }}"
+           class="{{ 'active' if chat.session_id == current_session_id else '' }}">
+        {{ chat.title or ('Chat ' + chat.session_id[:8]) }}
+      </a>
+      </li>
+      {% endfor %}
+    </ul>
+  </aside>
 
-<form id="chat-form" onsubmit="event.preventDefault(); sendMessage();">
-    <input name="message" placeholder="Nachricht" required>
-    <button type="submit">Senden</button>
-</form>
+  <!-- 🔹 Chat Area -->
+  <main class="chat-container">
+    <div id="chat" class="chat-box"></div>
+
+    <form id="chat-form" onsubmit="event.preventDefault(); sendMessage();">
+      <input name="message" placeholder="Type your message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </main>
+</div>
+
 {% endblock %}

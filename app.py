@@ -84,26 +84,19 @@ def generate(user_input: str, session_id: str, history: str):
         yield f"data: {json.dumps({'error': str(e)})}\n\n"
     
     
-@app.route("/stream", methods=["GET", "POST"])
-def stream():
-    data = request.get_json()
-    if not data or "message" not in data:
-        return "Missing input", 400
-
-    # Session-ID
-    if "id" not in session:
-        session["id"] = str(uuid.uuid4())
-    session_id = session["id"]
-    
-    if request.method == "GET":
-        return redirect(url_for("stream_with_session_id", session_id=session_id))
-    
-    return jsonify({'session_id': session_id}), 200
+@app.route("/chats", methods=["GET", "POST"])
+def chats():
+    all_chats = persistant_memory.get_all_sessions()  
+    if not all_chats:
+        return redirect(url_for("new_chat"))
+    first_chat = all_chats[0]
+    return redirect(url_for("chat", session_id=first_chat.session_id,  chats=all_chats))
 
 
-@app.route('/stream/<session_id>', methods=["GET", "POST"])
-def stream_with_session_id(session_id):
-    history=msg.get_messages(session_id)
+@app.route('/chat/<session_id>', methods=["GET", "POST"])
+def chat(session_id):
+    chats=persistant_memory.get_all_sessions()
+    history=msg.get_messages(session_id)    
     
     if request.method == "POST":
         data = request.get_json()
@@ -120,7 +113,18 @@ def stream_with_session_id(session_id):
             mimetype="text/event-stream"
         )
     
-    return render_template('chat.html', messages=history)
+    return render_template('chat.html', messages=history, chats=chats)
+
+@app.route("/new_chat", methods=["POST"])
+def new_chat():
+    session_id = str(uuid.uuid4())
+    
+    persistant_memory.save_session(
+        session_id=session_id,
+        title=session_id
+    )   
+    
+    return redirect(url_for("chat", session_id=session_id))
                 
 @app.route('/delete_history/<session_id>')
 def delete_history(session_id):

@@ -11,16 +11,17 @@ class EpisodicMemory:
     def __init__(self):
         """Initializes the SQL Engine"""
         self.db_engine = SQL()
-        self.session_gen = self.db_engine.get_db()
+
     
     def save_session(self, session_id: str, title: str) -> None: 
-        """Saving the session to the database"""
-        db = next(self.session_gen)     
+        """Saving the session to the database"""      
+        session_gen = self.db_engine.get_db()
+        db = next(session_gen)
         
         try:
             # Saving Chat Session
             save_session = ChatSession(
-                id=session_id,
+                session_id=session_id,
                 title=title
             )
             db.add(save_session)
@@ -28,13 +29,13 @@ class EpisodicMemory:
             db.flush()    
 
         finally:
-            self.session_gen.close()
+            session_gen.close()
             
     def save_summary(self, **params: dict):
         """Saving the summary to the database"""
-        
-        db = next(self.session_gen)
-        
+        session_gen = self.db_engine.get_db()
+        db = next(session_gen)
+       
         try:
             save_summary = ChatSummary(
                 initial_question=params.get('initial_question', ''),
@@ -55,8 +56,8 @@ class EpisodicMemory:
             
     def get_summary(self, session_id: str) -> str | None:
         """Retrieve summary from database"""
-        
-        db = next(self.session_gen)
+        session_gen = self.db_engine.get_db()
+        db = next(session_gen)
         
         try:
             # Filter by summary id and ordered by id descending to get the last entry
@@ -70,5 +71,20 @@ class EpisodicMemory:
                 return None
         except Exception as e:
             print(f"Error retrieving summary: {e}")
+            
+            
+    def get_all_sessions(self):
+        """Returns all sessions"""     
+        session_gen = self.db_engine.get_db()
+        db = next(session_gen) 
+                        
+        return db.query(ChatSession).all()
+    
+    def get_session(self, session_id: str):
+        """Returns a specific session"""
+        session_gen = self.db_engine.get_db()
+        db = next(session_gen)
+        
+        return db.query(ChatSession).filter_by(session_id=session_id).first()
 
         

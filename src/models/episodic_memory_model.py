@@ -36,12 +36,14 @@ class ChatSummary(Base):
     context_summary: Mapped[str] = mapped_column(String, nullable=False)     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)    
     
-    session_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    session_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("chat_session.session_id", ondelete="CASCADE"),
+        nullable=False
+    )
+
     session: Mapped["ChatSession"] = relationship(
-        back_populates="summaries",
-        primaryjoin="ChatSummary.session_id==ChatSsession.session_id",
-        foreign_keys=[session_id],
-        viewonly=True
+        back_populates="summaries"
     )  
     
     
